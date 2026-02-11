@@ -1,199 +1,508 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Agenda BTX</title>
 
 <style>
 :root{
-  --btx-blue:#1877F2;
-  --border-color:#1877F2;
+  --btx-blue:#1877F2; /* azul tipo Meta */
+  --line:#d8e3f5;
+  --bg:#f5f7fb;
 }
 
+*{ box-sizing:border-box; }
+
 body{
-  font-family: Arial, sans-serif;
-  background:#f5f7fb;
   margin:0;
   padding:20px;
+  font-family: Arial, sans-serif;
+  background:var(--bg);
+  color:#111;
 }
 
 .container{
-  background:white;
+  background:#fff;
   max-width:1100px;
-  margin:auto;
-  padding:20px;
-  border-top:4px solid var(--border-color);
-  border-left:2px solid var(--border-color);
-  border-right:2px solid var(--border-color);
+  margin:0 auto;
+  padding:18px;
+  border-top:4px solid var(--btx-blue);
+  border-left:2px solid var(--btx-blue);
+  border-right:2px solid var(--btx-blue);
 }
 
 h1{
+  margin:6px 0 14px;
   text-align:center;
   color:var(--btx-blue);
-  margin-bottom:20px;
+  font-weight:800;
 }
 
 .controls{
   display:flex;
   justify-content:space-between;
-  margin-bottom:15px;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.controls .nav{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+#monthYear{
+  font-weight:800;
+  color:var(--btx-blue);
+  text-transform:capitalize;
 }
 
 button{
   background:var(--btx-blue);
   color:white;
   border:none;
-  padding:6px 12px;
+  padding:8px 12px;
   cursor:pointer;
-  border-radius:4px;
+  border-radius:8px;
+  font-weight:800;
+}
+
+button:active{ transform:translateY(1px); }
+
+.weekdays{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  margin-bottom:6px;
+}
+
+.weekday{
+  text-align:center;
+  font-size:12px;
+  font-weight:800;
+  color:var(--btx-blue);
+  padding:6px 4px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fbfdff;
 }
 
 .calendar{
   display:grid;
   grid-template-columns:repeat(7,1fr);
-  gap:5px;
+  gap:6px;
 }
 
 .day{
-  border:1px solid #d0d7e6;
-  min-height:120px;
-  padding:5px;
-  font-size:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  min-height:64px;
+  padding:8px;
+  background:#fff;
+  cursor:pointer;
   position:relative;
-  background:#ffffff;
+}
+
+.day.empty{
+  background:transparent;
+  border:none;
+  cursor:default;
 }
 
 .day-number{
-  font-weight:bold;
+  font-weight:900;
   color:var(--btx-blue);
+  font-size:13px;
+}
+
+.day.selected{
+  outline:2px solid var(--btx-blue);
+  outline-offset:2px;
+}
+
+.dot{
+  position:absolute;
+  right:10px;
+  top:10px;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--btx-blue);
+  opacity:.9;
+  display:none;
+}
+.day.has-note .dot{ display:block; }
+
+.panel-wrap{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: 1.25fr .75fr;
+  gap:12px;
+}
+
+.panel{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:12px;
+  background:#fbfdff;
+}
+
+.panel-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.panel-title strong{
+  color:var(--btx-blue);
+  font-size:14px;
+}
+
+.badge{
+  font-size:12px;
+  font-weight:900;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:#333;
+  white-space:nowrap;
 }
 
 textarea{
   width:100%;
-  font-size:11px;
-  border:none;
-  resize:none;
+  min-height:180px;
+  resize:vertical;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+  font-size:14px;
+  outline:none;
+  background:#fff;
 }
 
 textarea:focus{
-  outline:none;
+  border-color:var(--btx-blue);
 }
 
-.file-preview{
-  max-width:60px;
-  margin-top:4px;
-}
-
-.footer{
-  position:fixed;
-  bottom:5px;
-  right:10px;
+.small{
+  margin-top:8px;
   font-size:12px;
   color:#333;
 }
 
+.attach-row{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+input[type="file"]{
+  border:1px dashed var(--line);
+  padding:10px;
+  border-radius:12px;
+  background:#fff;
+}
+
+.attach-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.secondary{
+  background:#fff;
+  color:var(--btx-blue);
+  border:1px solid var(--btx-blue);
+}
+
+.preview{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.preview-card{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:14px;
+  padding:10px;
+}
+
+.preview-card .name{
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.preview-img{
+  max-width:150px; /* pequeno */
+  max-height:110px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  display:block;
+}
+
+.footer{
+  position:fixed;
+  right:10px;
+  bottom:6px;
+  font-size:12px;
+  color:#222;
+  text-align:right;
+  background:rgba(255,255,255,.88);
+  padding:6px 8px;
+  border-radius:12px;
+  border:1px solid var(--line);
+}
+
+@media (max-width: 900px){
+  .panel-wrap{ grid-template-columns:1fr; }
+}
+
 @media print{
-  button, input{
-    display:none;
+  button, input[type="file"], .secondary{
+    display:none !important;
   }
-  body{
-    background:white;
+  body{ background:#fff; }
+  .footer{
+    position:fixed;
+    right:10px;
+    bottom:6px;
+    border:1px solid #ddd;
+    background:#fff;
   }
+  textarea{ border:1px solid #ddd; }
 }
 </style>
 </head>
 
 <body>
+  <div class="container">
+    <h1>Agenda BTX</h1>
 
-<div class="container">
-  <h1>Agenda BTX</h1>
+    <div class="controls">
+      <div class="nav">
+        <button onclick="prevMonth()">◀</button>
+        <div id="monthYear"></div>
+        <button onclick="nextMonth()">▶</button>
+      </div>
+      <button onclick="window.print()">Imprimir</button>
+    </div>
 
-  <div class="controls">
-    <button onclick="prevMonth()">◀</button>
-    <div id="monthYear"></div>
-    <button onclick="nextMonth()">▶</button>
-    <button onclick="window.print()">Imprimir</button>
+    <div class="weekdays">
+      <div class="weekday">Dom</div><div class="weekday">Seg</div><div class="weekday">Ter</div>
+      <div class="weekday">Qua</div><div class="weekday">Qui</div><div class="weekday">Sex</div><div class="weekday">Sáb</div>
+    </div>
+
+    <div class="calendar" id="calendar"></div>
+
+    <!-- Aqui é o foco: bloco de notas + UMA área de anexos -->
+    <div class="panel-wrap">
+      <div class="panel">
+        <div class="panel-title">
+          <strong>Bloco de notas</strong>
+          <span class="badge" id="selectedLabel">Selecione um dia</span>
+        </div>
+        <textarea id="dayNote" placeholder="Escreva aqui..." oninput="saveSelectedNote()"></textarea>
+        <div class="small">Salva automaticamente neste aparelho (navegador).</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <strong>Anexos</strong>
+          <span class="badge">1 caixa</span>
+        </div>
+
+        <div class="attach-row">
+          <input id="fileInput" type="file" accept="image/*,.pdf,.doc,.docx,.txt" />
+          <div class="attach-actions">
+            <button onclick="addAttachment()">Adicionar</button>
+            <button class="secondary" onclick="clearAttachments()">Limpar</button>
+          </div>
+          <div class="small">Imagens aparecem pequenas. Outros arquivos ficam listados por nome.</div>
+        </div>
+
+        <div id="attachments" class="preview"></div>
+      </div>
+    </div>
   </div>
 
-  <div class="calendar" id="calendar"></div>
-</div>
-
-<div class="footer">
-  Desenvolvido por BTX TECH <br>
-  Telefone 999873835
-</div>
+  <div class="footer">
+    Desenvolvido por BTX TECH <br>
+    Telefone 999873835
+  </div>
 
 <script>
 let date = new Date();
+let selectedDay = null;
+
+function keyBase(){ return `${date.getMonth()}-${date.getFullYear()}`; }
+function noteKey(day){ return `btx-note-${day}-${keyBase()}`; }
+function attachKey(){ return `btx-attach-${keyBase()}`; }
 
 function renderCalendar(){
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
-  const monthYear = document.getElementById("monthYear");
+
+  document.getElementById("monthYear").innerText =
+    date.toLocaleString("pt-br",{month:"long"}) + " " + date.getFullYear();
 
   const month = date.getMonth();
   const year = date.getFullYear();
-
-  monthYear.innerText = date.toLocaleString("pt-br",{month:"long"}) + " " + year;
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month+1, 0).getDate();
 
   for(let i=0;i<firstDay;i++){
-    calendar.innerHTML += "<div></div>";
+    const empty = document.createElement("div");
+    empty.className = "day empty";
+    calendar.appendChild(empty);
   }
 
-  for(let day=1;day<=daysInMonth;day++){
-    const dayDiv = document.createElement("div");
-    dayDiv.className = "day";
+  for(let day=1; day<=daysInMonth; day++){
+    const div = document.createElement("div");
+    div.className = "day";
+    div.onclick = () => selectDay(day);
 
-    const savedText = localStorage.getItem(`note-${day}-${month}-${year}`) || "";
-    const savedImage = localStorage.getItem(`img-${day}-${month}-${year}`);
+    const hasText = (localStorage.getItem(noteKey(day)) || "").trim().length > 0;
+    if(hasText) div.classList.add("has-note");
+    if(selectedDay === day) div.classList.add("selected");
 
-    dayDiv.innerHTML = `
+    div.innerHTML = `
       <div class="day-number">${day}</div>
-      <textarea placeholder="Anotações..." 
-      oninput="saveNote(${day})" 
-      id="note-${day}">${savedText}</textarea>
-      <input type="file" accept="image/*" onchange="saveImage(event,${day})">
-      ${savedImage ? `<img src="${savedImage}" class="file-preview">` : ""}
+      <div class="dot"></div>
     `;
+    calendar.appendChild(div);
+  }
 
-    calendar.appendChild(dayDiv);
+  if(selectedDay && selectedDay > daysInMonth){
+    selectedDay = null;
+    document.getElementById("dayNote").value = "";
+  }
+
+  setSelectedLabel();
+  renderAttachments();
+}
+
+function setSelectedLabel(){
+  const label = document.getElementById("selectedLabel");
+  if(!selectedDay){
+    label.textContent = "Selecione um dia";
+  } else {
+    const m = date.toLocaleString("pt-br",{month:"long"});
+    label.textContent = `${selectedDay} de ${m} de ${date.getFullYear()}`;
   }
 }
 
-function saveNote(day){
-  const month = date.getMonth();
-  const year = date.getFullYear();
-  const text = document.getElementById(`note-${day}`).value;
-  localStorage.setItem(`note-${day}-${month}-${year}`,text);
+function selectDay(day){
+  selectedDay = day;
+  document.getElementById("dayNote").value = localStorage.getItem(noteKey(day)) || "";
+  renderCalendar();
 }
 
-function saveImage(event,day){
-  const reader = new FileReader();
-  reader.onload = function(){
-    const month = date.getMonth();
-    const year = date.getFullYear();
-    localStorage.setItem(`img-${day}-${month}-${year}`,reader.result);
-    renderCalendar();
-  }
-  reader.readAsDataURL(event.target.files[0]);
+function saveSelectedNote(){
+  if(!selectedDay) return;
+  localStorage.setItem(noteKey(selectedDay), document.getElementById("dayNote").value);
+  renderCalendar(); // atualiza pontinho
 }
 
 function prevMonth(){
   date.setMonth(date.getMonth()-1);
+  selectedDay = null;
+  document.getElementById("dayNote").value = "";
   renderCalendar();
 }
 
 function nextMonth(){
   date.setMonth(date.getMonth()+1);
+  selectedDay = null;
+  document.getElementById("dayNote").value = "";
   renderCalendar();
+}
+
+/* --------- UMA área de anexos por mês --------- */
+function getAttachments(){
+  try { return JSON.parse(localStorage.getItem(attachKey()) || "[]"); }
+  catch(e){ return []; }
+}
+
+function setAttachments(list){
+  localStorage.setItem(attachKey(), JSON.stringify(list));
+}
+
+function addAttachment(){
+  const input = document.getElementById("fileInput");
+  const file = input.files && input.files[0];
+  if(!file) return;
+
+  const list = getAttachments();
+
+  if(file.type.startsWith("image/")){
+    const reader = new FileReader();
+    reader.onload = () => {
+      list.unshift({ name:file.name, type:file.type, data:reader.result });
+      setAttachments(list);
+      input.value = "";
+      renderAttachments();
+    };
+    reader.readAsDataURL(file);
+  } else {
+    list.unshift({ name:file.name, type:file.type || "arquivo", data:null });
+    setAttachments(list);
+    input.value = "";
+    renderAttachments();
+  }
+}
+
+function clearAttachments(){
+  setAttachments([]);
+  renderAttachments();
+}
+
+function renderAttachments(){
+  const wrap = document.getElementById("attachments");
+  const list = getAttachments();
+  wrap.innerHTML = "";
+
+  if(list.length === 0){
+    wrap.innerHTML = `<div class="small">Sem anexos neste mês.</div>`;
+    return;
+  }
+
+  list.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "preview-card";
+
+    if(item.data && item.type.startsWith("image/")){
+      card.innerHTML = `
+        <div class="name">${escapeHtml(item.name)}</div>
+        <img class="preview-img" src="${item.data}" alt="${escapeHtml(item.name)}">
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="name">${escapeHtml(item.name)}</div>
+        <div class="small">Arquivo registrado (nome). Para “guardar o arquivo mesmo”, só com servidor/Drive.</div>
+      `;
+    }
+
+    wrap.appendChild(card);
+  });
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[s]));
 }
 
 renderCalendar();
 </script>
-
 </body>
 </html>
