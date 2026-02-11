@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda BTX</title>
+
+<style>
+:root{
+  --btx-blue:#1877F2;
+  --border-color:#1877F2;
+}
+
+body{
+  font-family: Arial, sans-serif;
+  background:#f5f7fb;
+  margin:0;
+  padding:20px;
+}
+
+.container{
+  background:white;
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+  border-top:4px solid var(--border-color);
+  border-left:2px solid var(--border-color);
+  border-right:2px solid var(--border-color);
+}
+
+h1{
+  text-align:center;
+  color:var(--btx-blue);
+  margin-bottom:20px;
+}
+
+.controls{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:15px;
+}
+
+button{
+  background:var(--btx-blue);
+  color:white;
+  border:none;
+  padding:6px 12px;
+  cursor:pointer;
+  border-radius:4px;
+}
+
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:5px;
+}
+
+.day{
+  border:1px solid #d0d7e6;
+  min-height:120px;
+  padding:5px;
+  font-size:12px;
+  position:relative;
+  background:#ffffff;
+}
+
+.day-number{
+  font-weight:bold;
+  color:var(--btx-blue);
+}
+
+textarea{
+  width:100%;
+  font-size:11px;
+  border:none;
+  resize:none;
+}
+
+textarea:focus{
+  outline:none;
+}
+
+.file-preview{
+  max-width:60px;
+  margin-top:4px;
+}
+
+.footer{
+  position:fixed;
+  bottom:5px;
+  right:10px;
+  font-size:12px;
+  color:#333;
+}
+
+@media print{
+  button, input{
+    display:none;
+  }
+  body{
+    background:white;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>Agenda BTX</h1>
+
+  <div class="controls">
+    <button onclick="prevMonth()">◀</button>
+    <div id="monthYear"></div>
+    <button onclick="nextMonth()">▶</button>
+    <button onclick="window.print()">Imprimir</button>
+  </div>
+
+  <div class="calendar" id="calendar"></div>
+</div>
+
+<div class="footer">
+  Desenvolvido por BTX TECH <br>
+  Telefone 999873835
+</div>
+
+<script>
+let date = new Date();
+
+function renderCalendar(){
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+  const monthYear = document.getElementById("monthYear");
+
+  const month = date.getMonth();
+  const year = date.getFullYear();
+
+  monthYear.innerText = date.toLocaleString("pt-br",{month:"long"}) + " " + year;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  for(let i=0;i<firstDay;i++){
+    calendar.innerHTML += "<div></div>";
+  }
+
+  for(let day=1;day<=daysInMonth;day++){
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "day";
+
+    const savedText = localStorage.getItem(`note-${day}-${month}-${year}`) || "";
+    const savedImage = localStorage.getItem(`img-${day}-${month}-${year}`);
+
+    dayDiv.innerHTML = `
+      <div class="day-number">${day}</div>
+      <textarea placeholder="Anotações..." 
+      oninput="saveNote(${day})" 
+      id="note-${day}">${savedText}</textarea>
+      <input type="file" accept="image/*" onchange="saveImage(event,${day})">
+      ${savedImage ? `<img src="${savedImage}" class="file-preview">` : ""}
+    `;
+
+    calendar.appendChild(dayDiv);
+  }
+}
+
+function saveNote(day){
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const text = document.getElementById(`note-${day}`).value;
+  localStorage.setItem(`note-${day}-${month}-${year}`,text);
+}
+
+function saveImage(event,day){
+  const reader = new FileReader();
+  reader.onload = function(){
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    localStorage.setItem(`img-${day}-${month}-${year}`,reader.result);
+    renderCalendar();
+  }
+  reader.readAsDataURL(event.target.files[0]);
+}
+
+function prevMonth(){
+  date.setMonth(date.getMonth()-1);
+  renderCalendar();
+}
+
+function nextMonth(){
+  date.setMonth(date.getMonth()+1);
+  renderCalendar();
+}
+
+renderCalendar();
+</script>
+
+</body>
+</html>
